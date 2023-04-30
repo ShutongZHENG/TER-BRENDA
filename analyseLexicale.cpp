@@ -1,5 +1,6 @@
 #include "analyseLexicale.hpp"
 
+// Split a string according to a delimiter and return a vector of substrings
 vector<string> split(string str, string delimiter)
 {
     vector<string> res;
@@ -17,7 +18,7 @@ vector<string> split(string str, string delimiter)
 
     return res;
 }
-
+// Extract the content between the first two quotes of a string
 string extractContent(string str)
 {
     int pos1 = str.find("\"");
@@ -25,17 +26,15 @@ string extractContent(string str)
     string res = str.substr(pos1 + 1, pos2 - pos1 - 1);
     return res;
 }
-
+// Constructor with pathfile argument
 analyseLexicale::analyseLexicale(string pathfile)
 {
     this->pathfile = pathfile;
-    this->extract();
+    this->extract(); // Extract data from the input file
     cout << "extract finished" << endl;
     verifierInhib();
 
-
-
-    this->buildGraph();
+    this->buildGraph(); // Build the graph structure of the model
     graph = new Graph(edges.size());
     for (int i = 0; i < edges.size(); i++)
     {
@@ -43,10 +42,9 @@ analyseLexicale::analyseLexicale(string pathfile)
         for (int e : edges[i]->toIndices)
         {
             if (e == -1)
-            break;
+                break;
             graph->addEdge(i, e);
         }
-
     }
     cout << "build graph finished" << endl;
 }
@@ -54,11 +52,12 @@ analyseLexicale::analyseLexicale(string pathfile)
 analyseLexicale::~analyseLexicale()
 {
 }
-
+// Getter for the pathfile attribute
 string analyseLexicale::getPathfile()
 {
     return this->pathfile;
 }
+// Extract data from the input file and initialize the reactions and inhibitions vectors
 void analyseLexicale::extract()
 {
     bool isReaction = true;
@@ -181,133 +180,132 @@ void analyseLexicale::extract()
                 tmp = split(str_units, " ");
                 inhibition->units[0] = new Espace(0, tmp[1]);
                 inhibition->concentrations[0] = new double(stod(tmp[0]));
-                
+
                 if (this->espaces.count(extractContent(str_enzyme)) == 0)
                 {
                     indice++;
                     this->espaces.insert(std::pair<string, Espace *>(extractContent(str_enzyme), new Espace(indice, extractContent(str_enzyme))));
                     inhibition->enzyme = this->espaces[extractContent(str_enzyme)];
-                    if (   this->inhibitions.size() != 0 && this->inhibitions.back()->enzyme->name == inhibition->enzyme->name)
+                    if (this->inhibitions.size() != 0 && this->inhibitions.back()->enzyme->name == inhibition->enzyme->name)
                     {
                         this->inhibitions.back()->suivants.push_back(inhibition);
-                    }else{
+                    }
+                    else
+                    {
                         this->inhibitions.push_back(inhibition);
                     }
 
                     this->listInhibitions.push_back(inhibition);
-                }else{
+                }
+                else
+                {
                     inhibition->enzyme = this->espaces[extractContent(str_enzyme)];
-                    if (  this->inhibitions.size() != 0 && this->inhibitions.back()->enzyme->name == inhibition->enzyme->name)
+                    if (this->inhibitions.size() != 0 && this->inhibitions.back()->enzyme->name == inhibition->enzyme->name)
                     {
                         this->inhibitions.back()->suivants.push_back(inhibition);
-                    }else{
+                    }
+                    else
+                    {
                         this->inhibitions.push_back(inhibition);
                     }
                     this->listInhibitions.push_back(inhibition);
-                    
-                  
                 }
-                
-                
             }
         }
         // cout << line.size() << endl;
     }
 }
 
-void analyseLexicale::buildGraph(){
-    
-  // this->edges.push_back();
+// This function builds a graph of reactions by iterating over the list of reactions and creating an edge for each pair of reactions that share a common substrate or product.
+void analyseLexicale::buildGraph()
+{
 
-    for (int i =0; i< this->listReactions.size(); i++){
+    // this->edges.push_back();
 
-            Edge *edge = new Edge();
-            //To
-            for (int j=0; j< this->listReactions[i]->n_products; j++){
+    for (int i = 0; i < this->listReactions.size(); i++)
+    {
 
-                Espace *product = this->listReactions[i]->products[j];
-              
-                for (int indiceReaction = 0 ; indiceReaction < this->listReactions.size(); indiceReaction++){
-                   
-                    for (int k=0; k< this->listReactions[indiceReaction]->n_substats; k++){
-                        Espace *substat = this->listReactions[indiceReaction]->substats[k];
-                        
-                       
-                        if (product->name == substat->name){
-                        
-                           edge->addToIndice(indiceReaction);
-                           
-                            
-                        }
-                    }
-                }
+        Edge *edge = new Edge();
+        // To
+        for (int j = 0; j < this->listReactions[i]->n_products; j++)
+        {
 
+            Espace *product = this->listReactions[i]->products[j];
 
-            }
-            
-            edge->addToIndice(-1);
-      
-            //From
-            for (int j=0; j< this->listReactions[i]->n_substats; j++){
+            for (int indiceReaction = 0; indiceReaction < this->listReactions.size(); indiceReaction++)
+            {
 
-                Espace * substat = this->listReactions[i]->substats[j];
-              
-                for (int indiceReaction = 0 ; indiceReaction < this->listReactions.size(); indiceReaction++){
-                
-                    for (int k=0; k< this->listReactions[indiceReaction]->n_products; k++){
-                        Espace * product = this->listReactions[indiceReaction]->products[k];
-                      
-                        if (substat->name == product->name){
-                         
-                           edge->addFromIndice(indiceReaction);
-                            
-                        }
+                for (int k = 0; k < this->listReactions[indiceReaction]->n_substats; k++)
+                {
+                    Espace *substat = this->listReactions[indiceReaction]->substats[k];
+
+                    if (product->name == substat->name)
+                    {
+
+                        edge->addToIndice(indiceReaction);
                     }
                 }
             }
+        }
 
-            edge->addFromIndice(-1);
+        edge->addToIndice(-1);
 
-            this->edges.push_back(edge);
-            
-            
+        // From
+        for (int j = 0; j < this->listReactions[i]->n_substats; j++)
+        {
+
+            Espace *substat = this->listReactions[i]->substats[j];
+
+            for (int indiceReaction = 0; indiceReaction < this->listReactions.size(); indiceReaction++)
+            {
+
+                for (int k = 0; k < this->listReactions[indiceReaction]->n_products; k++)
+                {
+                    Espace *product = this->listReactions[indiceReaction]->products[k];
+
+                    if (substat->name == product->name)
+                    {
+
+                        edge->addFromIndice(indiceReaction);
+                    }
+                }
+            }
+        }
+
+        edge->addFromIndice(-1);
+
+        this->edges.push_back(edge);
     }
-
 }
 
-
-
-  nodeFromTo analyseLexicale::getTraces(string entre, string sortie){
+// This function finds all reactions that have entre as a substrate and sortie as a product and returns them as a nodeFromTo object.
+nodeFromTo analyseLexicale::getTraces(string entre, string sortie)
+{
 
     nodeFromTo traces;
 
-    for (int i = 0 ; i<this->listReactions.size(); i++){
-        //find node entre
+    for (int i = 0; i < this->listReactions.size(); i++)
+    {
+        // find node entre
         for (int indiceEntre = 0; indiceEntre < listReactions[i]->n_substats; indiceEntre++)
         {
-    
-            if(listReactions[i]->substats[indiceEntre]->name == entre )
-            traces.from.push_back(i);
-             
+
+            if (listReactions[i]->substats[indiceEntre]->name == entre)
+                traces.from.push_back(i);
         }
-        //find node sortie
+        // find node sortie
         for (int indiceSortie = 0; indiceSortie < listReactions[i]->n_products; indiceSortie++)
         {
-            if(listReactions[i]->products[indiceSortie]->name == sortie )
-            traces.to.push_back(i);
+            if (listReactions[i]->products[indiceSortie]->name == sortie)
+                traces.to.push_back(i);
         }
-        
     }
-    
-    cout << "traces from " << entre << " to " << sortie <<" finised " <<endl;
+
+    cout << "traces from " << entre << " to " << sortie << " finised " << endl;
     return traces;
-  }
+}
 
-
-
-
-
-
+// This is an overloaded operator that allows printing of analyseLexicale objects. It generates a string representation of the reactions and their properties.
 ostream &operator<<(ostream &out, const analyseLexicale &a)
 {
     string res = "";
@@ -380,95 +378,114 @@ ostream &operator<<(ostream &out, const analyseLexicale &a)
     }
     for (int i = 0; i < a.inhibitions.size(); i++)
     {
-            res += a.inhibitions[i]->enzyme->name + " : ";
-            res += a.inhibitions[i]->substats[0]->name + " | ";
-            res += std::to_string(*a.inhibitions[i]->concentrations[0]) + " " + a.inhibitions[i]->units[0]->name;
+        res += a.inhibitions[i]->enzyme->name + " : ";
+        res += a.inhibitions[i]->substats[0]->name + " | ";
+        res += std::to_string(*a.inhibitions[i]->concentrations[0]) + " " + a.inhibitions[i]->units[0]->name;
+        res += ";\n";
+        for (int j = 0; j < a.inhibitions[i]->suivants.size(); j++)
+        {
+            res += a.inhibitions[i]->suivants[j]->enzyme->name + " : ";
+            res += a.inhibitions[i]->suivants[j]->substats[0]->name + " | ";
+            res += std::to_string(*a.inhibitions[i]->suivants[j]->concentrations[0]) + " " + a.inhibitions[i]->suivants[j]->units[0]->name;
             res += ";\n";
-            for (int j = 0; j < a.inhibitions[i]->suivants.size(); j++)
-            {
-                res += a.inhibitions[i]->suivants[j]->enzyme->name + " : ";
-                res += a.inhibitions[i]->suivants[j]->substats[0]->name + " | ";
-                res += std::to_string(*a.inhibitions[i]->suivants[j]->concentrations[0]) + " " + a.inhibitions[i]->suivants[j]->units[0]->name;
-                res += ";\n";
-            }
-            
+        }
     }
-    
+
     out << res;
     return out;
 }
 
- string analyseLexicale::printReaction(int indice){
+// This function generates a string representation of a single reaction specified by indice.
+string analyseLexicale::printReaction(int indice)
+{
     string res = "";
-    res +="\"" +listReactions[indice]->enzyme->name+"\" : ";
-    for (int i =0 ; i < listReactions[indice]->n_substats; i++){
-        res += "\"" +listReactions[indice]->substats[i]->name+"\" ";
-        if (i != listReactions[indice]->n_substats-1)
+    res += "\"" + listReactions[indice]->enzyme->name + "\" : ";
+    for (int i = 0; i < listReactions[indice]->n_substats; i++)
+    {
+        res += "\"" + listReactions[indice]->substats[i]->name + "\" ";
+        if (i != listReactions[indice]->n_substats - 1)
         {
-            res+="+ ";
-        }else{
-            res+="-> ";
+            res += "+ ";
         }
-    
-        
+        else
+        {
+            res += "-> ";
+        }
     }
 
     for (int i = 0; i < listReactions[indice]->n_products; i++)
     {
-        res+= "\"" +listReactions[indice]->products[i]->name+"\" ";
-        if (i != listReactions[indice]->n_products-1)
+        res += "\"" + listReactions[indice]->products[i]->name + "\" ";
+        if (i != listReactions[indice]->n_products - 1)
         {
-            res+="+ ";
-        }else{
-            res+="\n";
+            res += "+ ";
+        }
+        else
+        {
+            res += "\n";
         }
     }
 
-return res;
-    
- }
-
-
-string analyseLexicale::findPaths(int entre, int sortie, int distance){
-        
-    string res = "";
-    vector<vector<int> > all_paths= graph->findPaths(entre, sortie, distance);
-    // print all paths with required distance
-    for (vector<int> path : all_paths){
-    if(path.size() == distance){
-        for (int indice: path)
-            res +=this->printReaction(indice);
-        res +="-----------------\n";
-       }
-    }
-  
-   return res;
+    return res;
 }
 
+// This function finds all paths of length distance between the reactions with indices entre and sortie. It returns a vector of string representations of the reactions in each path.
+vector<string> analyseLexicale::findPaths(int entre, int sortie, int distance)
+{
 
-void analyseLexicale::verifierInhib() {
-    if (this->listInhibitions.size() > 0) {
+    vector<string> res;
+    vector<vector<int>> all_paths = graph->findPaths(entre, sortie, distance);
+    // print all paths with required distance
+    for (vector<int> path : all_paths)
+    {
+        if (path.size() == distance)
+        {
+            string str = "";
+            for (int indice : path)
+                str += this->printReaction(indice);
+            str += "-----------------\n";
+            res.push_back(str);
+        }
+    }
+
+    return res;
+}
+
+//  This function removes any reactions from listReactions that are inhibited by enzymes listed in listInhibitions.
+void analyseLexicale::verifierInhib()
+{
+    if (this->listInhibitions.size() > 0)
+    {
         int i = 0;
-        while (i < listReactions.size()) {
+        while (i < listReactions.size())
+        {
             bool shouldRemove = false;
-            for (auto e : listInhibitions) {
-                if (e->enzyme->name == listReactions[i]->enzyme->name) {
-                    for (int j = 0; j < listReactions[i]->n_substats; j++) {
-                        if (listReactions[i]->substats[j]->name == e->substats[0]->name) {
+            for (auto e : listInhibitions)
+            {
+                if (e->enzyme->name == listReactions[i]->enzyme->name)
+                {
+                    for (int j = 0; j < listReactions[i]->n_substats; j++)
+                    {
+                        if (listReactions[i]->substats[j]->name == e->substats[0]->name)
+                        {
                             shouldRemove = true;
                             break;
                         }
                     }
                 }
-                if (shouldRemove) {
+                if (shouldRemove)
+                {
                     break;
                 }
             }
 
-            if (shouldRemove) {
+            if (shouldRemove)
+            {
                 delete listReactions[i];
                 listReactions.erase(listReactions.begin() + i);
-            } else {
+            }
+            else
+            {
                 i++;
             }
         }
