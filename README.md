@@ -79,6 +79,7 @@ The demonstration includes compiling the source code using a Makefile to generat
     - `distance` is the distance between the substrate and the product.
 
 ### Demonstration Results
-After running the program with the provided arguments, the results of the reaction analysis, the application of the extraction algorithm, and the generation of the output module will be saved in the output.txt file. The results will include information on reactions, inhibitions, enzymes, substrates, products, as well as the paths found between the substrate and product at the specified distance.
+After running the program with the provided arguments, the results of the reaction analysis, the application of the extraction algorithm, and the generation of the output module will be saved in the output.txt file. The results will include information on reactions, inhibitions, enzymes, substrates, products, as well as the paths found between the substrate and product at the specified distance.、
 
-![Enzymatic Reactions output.txt](/documents/output.png)
+<img src="/documents/output.png" width="50%" alt="Enzymatic Reactions output.txt">
+
