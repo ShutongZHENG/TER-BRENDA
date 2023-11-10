@@ -42,7 +42,15 @@ The architecture of the extraction algorithm consists of a Graph class that cont
 Implemented the Graph class and its associated functions. Search functions use recursive programming techniques for DFS and DLS, and an iterative approach using a queue for BFS. IDDFS uses DLS with increasing depth.
 
 ### Performance Comparison
-Comparing the performance of BFS, DFS, and IDDFS in finding paths of a specific distance between two nodes.
+In the comparison of BFS, DFS, and IDDFS for finding paths of a specific distance between two nodes, a significant observation is the superior performance of IDDFS, particularly when the reaction distance exceeds 4. The key points of comparison are as follows:
+
+- **DFS (Depth-First Search)**: While DFS is efficient in certain scenarios, it can be less effective for larger distances as it deeply explores branches of the graph before moving to others. This could lead to substantial time spent on paths that do not match the desired distance.
+
+- **BFS (Breadth-First Search)**: BFS explores all nodes at a given depth before moving to the next level. While it finds the shortest paths first, it also explores all possible paths up to the desired distance, which can be inefficient in densely connected graphs.
+
+- **IDDFS (Iterative Deepening Depth-First Search)**: IDDFS combines the advantages of both DFS and BFS. It explores nodes at varying depths using a DFS approach while progressively increasing the search depth up to the desired distance. This approach allows IDDFS to quickly eliminate paths that are either too long or too short and efficiently find paths that match the specified distance. Notably, when the reaction distance is greater than 4, the speed of IDDFS is significantly faster than both BFS and DFS. This advantage is attributed to the way IDDFS balances depth exploration with breadth coverage, making it an ideal choice for exploring complex networks with longer paths.
+
+Overall, IDDFS demonstrates a more efficient performance in searching for paths of a specific distance between two nodes, especially in scenarios where the reaction distance is greater than 4, thereby outperforming both BFS and DFS in terms of speed and efficiency.
 
 ## Output Module
 ### Principle
